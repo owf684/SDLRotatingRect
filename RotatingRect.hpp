@@ -123,7 +123,7 @@ bool line_intersect(Vertex2D A, Vertex2D B, Vertex2D C, Vertex2D D)
             return true;
    }
    // one vertical segment
-   // segment AB non-rotated :: segment CD rotated
+   // segment AB non-rotated :: segment CD rotated or horizontal
    else if ( (A.x - B.x == 0) && abs(C.x - D.x) > 0 )
    {
         // get equation for vertical line
@@ -140,7 +140,8 @@ bool line_intersect(Vertex2D A, Vertex2D B, Vertex2D C, Vertex2D D)
 
         // vertical line AB intercepts rotated CD
         if ( ( ( y >= C.y && y <= D.y ) || ( y >= D.y && y <= C.y) )  &&
-             ( ( y >= A.y && y <= B.y ) || ( y >= B.y && y <= A.y) )
+             ( ( y >= A.y && y <= B.y ) || ( y >= B.y && y <= A.y) )  &&
+             ( ( A.x >= C.x && A.x <= D.x ) || (A.x >= D.x && A.x <= C.x) ) 
             )
         {
             return true;
@@ -164,7 +165,8 @@ bool line_intersect(Vertex2D A, Vertex2D B, Vertex2D C, Vertex2D D)
 
         // vertical line AB intercepts rotated CD
         if ( ( ( y >= C.y && y <= D.y ) || ( y >= D.y && y <= C.y) )  &&
-             ( ( y >= A.y && y <= B.y ) || ( y >= B.y && y <= A.y) )
+             ( ( y >= A.y && y <= B.y ) || ( y >= B.y && y <= A.y) )  &&
+             ( ( C.x >= A.x && C.x <= B.x ) || (C.x >= B.x && C.x <= A.x) ) 
             )
         {
             return true;
@@ -275,11 +277,10 @@ private:
 bool Segment2DInterect(Vertex2D rect_1_v1, Vertex2D rect_1_v2, Rect2D rect_2)
 {
     // Top Segment Rect 2
-    
     if (line_intersect(rect_1_v1,rect_1_v2,rect_2.getTopLeft(),rect_2.getTopRight()))
     {
         return true;
-    } 
+    }
     
     // Left Segment Rect 2
     
@@ -287,6 +288,7 @@ bool Segment2DInterect(Vertex2D rect_1_v1, Vertex2D rect_1_v2, Rect2D rect_2)
     {
         return true;
     }
+    
     
     // Bottom Segment Rect 2
     if (line_intersect(rect_1_v1,rect_1_v2,rect_2.getBottomLeft(),rect_2.getBottomRight()))
@@ -316,6 +318,7 @@ bool Rect2DIntersect(Rect2D rect_1, Rect2D rect_2)
     
 
     return top_segment || left_segment || bottom_segment || right_segment;
+    //return top_segment;
 }
 
 
