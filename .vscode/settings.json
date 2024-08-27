@@ -14,6 +14,11 @@
             "cwd": "/Users/christophercorona/Downloads/RotatingRect",
             "binaryPath": "/Users/christophercorona/Downloads/RotatingRect/RBB",
             "binaryArgs": []
+        },
+        {
+            "cwd": "/Users/corona_systems/SDLRotatingRect",
+            "binaryPath": "/Users/corona_systems/SDLRotatingRect/RBB",
+            "binaryArgs": []
         }
     ],
     "makefile.buildLog": "/Users/christophercorona/Downloads/RBB",
