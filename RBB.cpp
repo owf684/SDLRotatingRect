@@ -21,19 +21,29 @@ int main(){
 
     bool quit;
     float theta = 0;
-    RotatingRect::Rect2D test(400,400,400,200);
-    RotatingRect::Rect2D test2(200,200,200,300);
+    RotatingRect::Rect2D test(300,300,100,100);
+    RotatingRect::Rect2D test2(200,200,100,100);
 
-    float x = 200;
-    float y = 350;
+    float x = 0;
+    float y = 0;
     float theta_1 = 0;
     float theta_2 = 360;
     int theta_1_sign = 1;
     int theta_2_sign = 1;
 
-    test.rotate_rect(theta_1);
+    //test.rotate_rect(theta_1);
     float move_speed = 10;
-    test2.rotate_rect(theta_2);
+    //test2.rotate_rect(theta_2);
+
+    struct move {
+        bool left;
+        bool right;
+        bool up;
+        bool down;
+        move(){left = false; right = false; up = false; down = false;}
+    };
+    move input;
+
     while (!quit)
     {
         SDL_PollEvent(&events);
@@ -47,16 +57,34 @@ int main(){
 			switch(events.key.keysym.sym){
 			
                 case SDLK_UP:
-                y -= move_speed;
+                input.up = true;
                 break;
                 case SDLK_DOWN:
-                y += move_speed;
+                input.down = true;
                 break;
                 case SDLK_LEFT:
-                x -= move_speed;
+                input.left = true;
                 break;
                 case SDLK_RIGHT:
-                x += move_speed;
+                input.right = true;
+                break;
+            }
+            break;
+
+        case SDL_KEYUP:
+            switch(events.key.keysym.sym)
+            {
+                case SDLK_UP:
+                input.up = false;
+                break;
+                case SDLK_DOWN:
+                input.down = false;
+                break;
+                case SDLK_LEFT:
+                input.left = false;
+                break;
+                case SDLK_RIGHT:
+                input.right =false;
                 break;
             }
             break;
@@ -65,17 +93,36 @@ int main(){
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);	
 
-        
+        if (input.right)
+        {
+            x += 1;
+        } 
+        if (input.left)
+        {
+            x -= 1;
+        }
+
+        if (input.up){
+            y -= 1;
+        } 
+        if (input.down)
+        {
+            y += 1;
+        }
+
+
         test2.set_position(x,y);
+
         
-        test.rotate_rect(theta_1);
-        test2.rotate_rect(theta_2);
+        //test.rotate_rect(theta_1);
+        //test2.rotate_rect(theta_2);
 
         if (RotatingRect::Rect2DIntersect(test2,test) ){
             SDL_SetRenderDrawColor(renderer,255,0,0,255);
             theta_2_sign *= -1;
         } else{
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
         }
         test2.draw_rect(renderer);
         
@@ -90,7 +137,7 @@ int main(){
         
         usleep(0.01667 * pow(10,6) );
       
-        theta_1 += 1*theta_1_sign;
+        theta_1 += 2*theta_1_sign;
         if (theta_1 > 360) theta_1 = 0;
 
         theta_2 -= 1*theta_2_sign;
