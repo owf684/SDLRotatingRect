@@ -125,26 +125,22 @@ int main(){
         test.rotate_rect(theta_1);
         test2.rotate_rect(theta_2);
 
-        if (RotatingRect::Rect2DIntersect(test2,test) ){
-            SDL_SetRenderDrawColor(renderer,255,0,0,255);
+        if (test2.Rect2DIntersect(test) )
             theta_2_sign *= -1;
-        } else{
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-        }
-        test2.draw_rect(renderer);
         
-        if (RotatingRect::Rect2DIntersect(test,test2))
+        
+        if (test.Rect2DIntersect(test2))
         {
-            SDL_SetRenderDrawColor(renderer,0,255,0,255);
             collision_detected = true;
             theta_1_sign *= -1;
         } else{
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
             collision_detected = false;
         }
+
+
         test.draw_rect(renderer);
-        
+        test2.draw_rect(renderer);
+  
         usleep(0.01667 * pow(10,6) );
       
         theta_1 += 2*theta_1_sign;
