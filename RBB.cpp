@@ -43,7 +43,9 @@ int main(){
         move(){left = false; right = false; up = false; down = false;}
     };
     move input;
-
+    int just_pressed = -1;
+    int last_pressed = 0;
+    bool collision_detected = false;
     while (!quit)
     {
         SDL_PollEvent(&events);
@@ -58,15 +60,19 @@ int main(){
 			
                 case SDLK_UP:
                 input.up = true;
+                just_pressed = 1;
                 break;
                 case SDLK_DOWN:
                 input.down = true;
+                just_pressed = 2;
                 break;
                 case SDLK_LEFT:
                 input.left = true;
+                just_pressed = 3;
                 break;
                 case SDLK_RIGHT:
                 input.right = true;
+                just_pressed = 4;
                 break;
             }
             break;
@@ -89,33 +95,35 @@ int main(){
             }
             break;
 	    }           	
- 
+        
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);	
+        if (!collision_detected || last_pressed != just_pressed){
 
-        if (input.right)
-        {
-            x += 1;
-        } 
-        if (input.left)
-        {
-            x -= 1;
+            if (input.right)
+            {
+                x += 1;
+            } 
+            if (input.left)
+            {
+                x -= 1;
+            }
+            if (input.up){
+                y -= 1;
+            } 
+            if (input.down)
+            {
+                y += 1;
+            }
         }
 
-        if (input.up){
-            y -= 1;
-        } 
-        if (input.down)
-        {
-            y += 1;
-        }
 
-
-        test2.set_position(x,y);
+            test2.set_position(x,y);
+        
 
         
-        //test.rotate_rect(theta_1);
-        //test2.rotate_rect(theta_2);
+        test.rotate_rect(theta_1);
+        test2.rotate_rect(theta_2);
 
         if (RotatingRect::Rect2DIntersect(test2,test) ){
             SDL_SetRenderDrawColor(renderer,255,0,0,255);
@@ -129,9 +137,11 @@ int main(){
         if (RotatingRect::Rect2DIntersect(test,test2))
         {
             SDL_SetRenderDrawColor(renderer,0,255,0,255);
+            collision_detected = true;
             theta_1_sign *= -1;
         } else{
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            collision_detected = false;
         }
         test.draw_rect(renderer);
         
@@ -145,6 +155,11 @@ int main(){
 
     
 	    SDL_RenderPresent(renderer);
+
+        if (just_pressed != last_pressed)
+        {
+            last_pressed = just_pressed;
+        }
     }
 
     
