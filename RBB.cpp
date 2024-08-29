@@ -21,8 +21,8 @@ int main(){
 
     bool quit;
     float theta = 0;
-    RotatingRect::Rect2D test(300,300,100,100);
-    RotatingRect::Rect2D test2(200,200,100,100);
+    RotatingRect::Rect2D test(300,300,100,300);
+    RotatingRect::Rect2D test2(200,200,300,100);
 
     float x = 0;
     float y = 0;
@@ -30,7 +30,6 @@ int main(){
     float theta_2 = 360;
     int theta_1_sign = 1;
     int theta_2_sign = 1;
-
     //test.rotate_rect(theta_1);
     float move_speed = 10;
     //test2.rotate_rect(theta_2);
@@ -98,64 +97,52 @@ int main(){
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);	
-        if (!collision_detected || last_pressed != just_pressed){
-
-            if (input.right)
+       
+            if (input.right && !test.collision_to_right())
             {
-                x += 1;
+                x += 5;
             } 
-            if (input.left)
+            if (input.left && !test.collision_to_left())
             {
-                x -= 1;
+                x -= 5;
             }
-            if (input.up){
-                y -= 1;
+            if (input.up && !test.collision_above()){
+                y -= 5;
             } 
-            if (input.down)
+            if (input.down && !test.collision_below())
             {
-                y += 1;
+                y += 5;
             }
-        }
-
-
-            test2.set_position(x,y);
-        
-
-        
+    
+        test.set_position(x,y);
         test.rotate_rect(theta_1);
         test2.rotate_rect(theta_2);
-
-        if (test2.Rect2DIntersect(test) )
-            theta_2_sign *= -1;
-        
-        
-        if (test.Rect2DIntersect(test2))
-        {
-            collision_detected = true;
-            theta_1_sign *= -1;
-        } else{
-            collision_detected = false;
-        }
-
-
         test.draw_rect(renderer);
         test2.draw_rect(renderer);
   
-        usleep(0.01667 * pow(10,6) );
-      
-        theta_1 += 2*theta_1_sign;
-        if (theta_1 > 360) theta_1 = 0;
+
+        if (test.Rect2DIntersect(test2) )
+        {
+            theta_1_sign *= -1;
+        }
+        if (test2.Rect2DIntersect(test)) {
+            theta_2_sign *= -1;
+        }
+
+        theta_1 += 1*theta_1_sign;
 
         theta_2 -= 1*theta_2_sign;
-        if (theta_2 < 0) theta_2 = 360;
 
+        if (theta_1 > 360) theta_1 =0;
+        if (theta_2 < 0) theta_2 = 360;
+      
+
+        usleep(0.01667 * pow(10,6) );
+      
     
 	    SDL_RenderPresent(renderer);
 
-        if (just_pressed != last_pressed)
-        {
-            last_pressed = just_pressed;
-        }
+    
     }
 
     
