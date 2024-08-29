@@ -38,7 +38,7 @@ struct Dimension2D{
 class Rect2D {
 
 public:
-
+    Rect2D(){}
     Rect2D(float x, float y, float width, float height)
     {
         // Defining top verticies
@@ -62,8 +62,47 @@ public:
         // Define origin
         origin.x = top_left.x + width / 2.0;
         origin.y = top_left.y + height / 2.0;
+
+        top_segment = false; bottom_segment = false; left_segment = false; right_segment = false;
+    }
+    bool is_intersect()
+    {
+        return top_segment || bottom_segment || left_segment || right_segment;
     }
 
+    float get_min_x(){ return min_x;}
+    float get_min_y(){ return min_y;}
+    bool collision_above() { return top_abs;}
+    bool collision_below() { return bottom_abs;}
+    bool collision_to_right(){ return right_abs;}
+    bool collision_to_left() {return left_abs;}
+    void set_rect(float x, float y, float width, float height)
+    {
+        // Defining top verticies
+        top_left.x = x;
+        top_left.y = y;
+        top_right.x = x + width;
+        top_right.y = y;
+        // Defining bottom verticies
+        bottom_left.x = x;
+        bottom_left.y = y + height;
+        bottom_right.x = x + width;
+        bottom_right.y = y + height;
+        // Defining dimension
+        size.w = width;
+        size.h = height;
+        // Defining destination verticies
+        top_left_dst = top_left;
+        top_right_dst = top_right;
+        bottom_left_dst = bottom_left;
+        bottom_right_dst = bottom_right;
+        // Define origin
+        origin.x = top_left.x + width / 2.0;
+        origin.y = top_left.y + height / 2.0; 
+
+        top_segment = false; bottom_segment = false; left_segment = false; right_segment = false;
+      
+    }
     void draw_rect(SDL_Renderer* renderer)
     {
         // draw top edge
@@ -125,6 +164,8 @@ public:
 
     bool Rect2DIntersect(Rect2D rect_2)
     {
+        // reset absolute paths
+        left_abs = false; right_abs = false; top_abs = false; bottom_abs = false;
 
         top_segment = Segment2DInterect(getTopLeft(),getTopRight(),rect_2);
 
@@ -134,6 +175,29 @@ public:
 
         right_segment = Segment2DInterect(getTopRight(),getBottomRight(),rect_2);
     
+        if (top_segment || left_segment || bottom_segment || right_segment)
+        {
+            find_min(); rect_2.find_min();
+
+            if (rect_2.get_min_x() < get_min_x())
+            {
+                left_abs = true;
+            }
+
+            if (rect_2.get_min_x() > get_min_x())
+            {
+                right_abs = true;
+            }
+            if (rect_2.get_min_y() < get_min_y())
+            {
+                top_abs = true;
+            }
+            if (rect_2.get_min_y() > get_min_y())
+            {
+                bottom_abs = true;
+            }
+        
+        }
 
         return top_segment || left_segment || bottom_segment || right_segment;
     }
@@ -153,13 +217,36 @@ private:
     RotatingRect::Vertex2D bottom_left_dst;
     RotatingRect::Vertex2D bottom_right_dst;
 
-    // Intersect variables
+    // Relative Intersect variables
     bool top_segment;
     bool left_segment;
     bool bottom_segment;
     bool right_segment;
-    float rotation_angle;
 
+    // Absolute Intersect_variables
+    bool top_abs;
+    bool left_abs;
+    bool bottom_abs;
+    bool right_abs;
+
+    float rotation_angle;
+    float min_x;
+    float min_y;
+
+    void find_min()
+    {
+        min_x = top_left_dst.x;
+        if ( top_right_dst.x < min_x)   {   min_x = top_right_dst.x;    }
+        if (bottom_left_dst.x < min_x)  {   min_x = bottom_left_dst.x;  }
+        if (bottom_right_dst.x < min_x) {   min_x = bottom_right_dst.x; }
+
+        min_y = top_left_dst.y;
+        if ( top_right_dst.y < min_y)   {   min_y = top_right_dst.y;    }
+        if (bottom_left_dst.y < min_y)  {   min_y = bottom_left_dst.y;  }
+        if (bottom_right_dst.y < min_y) {   min_y = bottom_right_dst.y; }        
+    
+    }
+    
 
     bool Segment2DInterect(Vertex2D rect_1_v1, Vertex2D rect_1_v2, Rect2D rect_2)
     {
