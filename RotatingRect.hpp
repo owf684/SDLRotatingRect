@@ -15,7 +15,10 @@
 #define ROTATINGRECT_HPP
 #pragma once
 #include<SDL2/SDL.h>
-
+#define ABOVE 0
+#define BELOW 1
+#define TO_RIGHT 2
+#define TO_LEFT 3
 
 namespace RotatingRect
 {
@@ -27,6 +30,31 @@ struct Vertex2D {
     Vertex2D(float xin, float yin)
     {
         x = xin; y = yin;
+    }
+};
+
+struct Vector2D{
+    float x;
+    float y;
+    Vector2D(){}
+    Vector2D(Vertex2D P1, Vertex2D P2)
+    {
+        x = P2.x - P1.x;
+        y = P2.y - P1.y;
+    }
+    Vector2D(float x_in, float y_in)
+    {
+        x = x_in;
+        y = y_in;
+    }
+    Vector2D get_orthoganal()
+    {
+        return Vector2D(-y, x);
+    }
+
+    float dot_product(Vector2D vector_in)
+    {
+        return (x*vector_in.x + y*vector_in.y);
     }
 };
 
@@ -65,17 +93,40 @@ public:
 
         top_segment = false; bottom_segment = false; left_segment = false; right_segment = false;
     }
-    bool is_intersect()
-    {
-        return top_segment || bottom_segment || left_segment || right_segment;
-    }
 
-    float get_min_x(){ return min_x;}
-    float get_min_y(){ return min_y;}
-    bool collision_above() { return top_abs;}
-    bool collision_below() { return bottom_abs;}
-    bool collision_to_right(){ return right_abs;}
-    bool collision_to_left() {return left_abs;}
+    /* 
+    * Function: is_intersect()
+    * 
+    * Purpose: returns a boolean of the local
+    * collision variables ORed together
+    */
+    bool is_intersect(){ return top_segment || bottom_segment || left_segment || right_segment;}
+
+    /* 
+    * Functions: collision(int DIRECTION)
+    *
+    * Purpose: returns the relevant global collision variable
+    *
+    * Arguments: DIRECTION -- must be an integer value between 0-3
+    */
+   bool collision(int DIRECTION)
+   {
+    switch(DIRECTION){
+        case ABOVE:
+            return top_global_collision;
+            break;
+        case BELOW:
+            return bottom_global_collision;
+            break;
+        case TO_RIGHT:
+            return right_global_collision;
+            break;
+        case TO_LEFT:
+            return left_global_collision;
+            break;
+    }
+   }
+
     void set_rect(float x, float y, float width, float height)
     {
         // Defining top verticies
@@ -121,7 +172,7 @@ public:
         if (left_segment) SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
         else SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderDrawLine(renderer,bottom_left_dst.x, bottom_left_dst.y,top_left_dst.x, top_left_dst.y);
-
+ 
     }
 
     void rotate_rect(float theta)
@@ -164,9 +215,10 @@ public:
 
     bool Rect2DIntersect(Rect2D rect_2)
     {
-        // reset absolute paths
-        left_abs = false; right_abs = false; top_abs = false; bottom_abs = false;
+        // reset global collision flags
+        left_global_collision = false; right_global_collision = false; top_global_collision = false; bottom_global_collision = false;
 
+        // calculate local intersections
         top_segment = Segment2DInterect(getTopLeft(),getTopRight(),rect_2);
 
         left_segment = Segment2DInterect(getTopLeft(),getBottomLeft(),rect_2);
@@ -174,31 +226,23 @@ public:
         bottom_segment = Segment2DInterect(getBottomLeft(),getBottomRight(),rect_2);
 
         right_segment = Segment2DInterect(getTopRight(),getBottomRight(),rect_2);
-    
-        if (top_segment || left_segment || bottom_segment || right_segment)
+
+        // calculate global collision 
+        if (top_segment)
         {
-            find_min(); rect_2.find_min();
-
-            if (rect_2.get_min_x() < get_min_x())
-            {
-                left_abs = true;
-            }
-
-            if (rect_2.get_min_x() > get_min_x())
-            {
-                right_abs = true;
-            }
-            if (rect_2.get_min_y() < get_min_y())
-            {
-                top_abs = true;
-            }
-            if (rect_2.get_min_y() > get_min_y())
-            {
-                bottom_abs = true;
-            }
-        
+            determine_global_collision(Vector2D(getTopLeft(), getTopRight()));
         }
-
+        if (left_segment){
+            determine_global_collision(Vector2D(getBottomLeft(),getTopLeft()));
+        }
+        if (bottom_segment){
+            determine_global_collision(Vector2D(getBottomRight(),getBottomLeft()));
+        }
+        if (right_segment)
+        {
+            determine_global_collision(Vector2D(getTopRight(), getBottomRight()));
+        }        
+    
         return top_segment || left_segment || bottom_segment || right_segment;
     }
 
@@ -224,29 +268,12 @@ private:
     bool right_segment;
 
     // Absolute Intersect_variables
-    bool top_abs;
-    bool left_abs;
-    bool bottom_abs;
-    bool right_abs;
+    bool top_global_collision;
+    bool left_global_collision;
+    bool bottom_global_collision;
+    bool right_global_collision;
 
     float rotation_angle;
-    float min_x;
-    float min_y;
-
-    void find_min()
-    {
-        min_x = top_left_dst.x;
-        if ( top_right_dst.x < min_x)   {   min_x = top_right_dst.x;    }
-        if (bottom_left_dst.x < min_x)  {   min_x = bottom_left_dst.x;  }
-        if (bottom_right_dst.x < min_x) {   min_x = bottom_right_dst.x; }
-
-        min_y = top_left_dst.y;
-        if ( top_right_dst.y < min_y)   {   min_y = top_right_dst.y;    }
-        if (bottom_left_dst.y < min_y)  {   min_y = bottom_left_dst.y;  }
-        if (bottom_right_dst.y < min_y) {   min_y = bottom_right_dst.y; }        
-    
-    }
-    
 
     bool Segment2DInterect(Vertex2D rect_1_v1, Vertex2D rect_1_v2, Rect2D rect_2)
     {
@@ -263,7 +290,6 @@ private:
             return true;
         }
     
-    
         // Bottom Segment Rect 2
         if (line_intersect(rect_1_v1,rect_1_v2,rect_2.getBottomLeft(),rect_2.getBottomRight()))
         {
@@ -278,7 +304,6 @@ private:
 
         return false;
     }
-
 
     Vertex2D rotate_vertex(Vertex2D v, float theta, Vertex2D o)
     {
@@ -345,18 +370,20 @@ private:
             float denominator = m1 - m2;
 
             // two rotated segments
-            if (denominator != 0)
+            if (int(denominator) != 0)
             {
 
                 float x_intercept = numerator / denominator;
 
                 if (((A.x <= x_intercept && x_intercept <= B.x) || (B.x <= x_intercept && x_intercept <= A.x)) &&
                     ((C.x <= x_intercept && x_intercept <= D.x) || (D.x <= x_intercept && x_intercept <= C.x)))
+                    {
                     return true;
 
+                    }
                 // two horizontal segments
             }
-            else if (denominator == 0 && numerator == 0)
+            else if (denominator >= -0.1 && denominator <= 0.1 && numerator >= -0.1 && numerator <= 0.1)
             {
 
                 if ((A.x >= C.x && A.x <= D.x) || (B.x >= C.x && B.x <= D.x))
@@ -421,6 +448,39 @@ private:
         }
 
         return false;
+    }
+
+    void determine_global_collision(Vector2D rect_edge){
+
+        Vector2D up(0,1);
+        Vector2D down(0,-1);
+        Vector2D left(-1,0);
+        Vector2D right(1,0);
+
+        float up_dot = rect_edge.get_orthoganal().dot_product(up);
+        float down_dot = rect_edge.get_orthoganal().dot_product(down);
+        float right_dot = rect_edge.get_orthoganal().dot_product(right);
+        float left_dot = rect_edge.get_orthoganal().dot_product(left);
+
+        if (up_dot > down_dot)
+        {
+            top_global_collision = true;
+        }
+        if (down_dot > up_dot)
+        {
+            bottom_global_collision = true;
+        }
+        if (left_dot > right_dot)
+        {
+            right_global_collision = true;
+        }
+
+        if (right_dot > left_dot)
+        {
+            left_global_collision = true;
+        }
+    
+
     }
 };
 } // namespace RotatingRect
