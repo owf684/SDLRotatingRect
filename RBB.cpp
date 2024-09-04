@@ -29,10 +29,10 @@ int main(){
     float theta_1 = 0;
     float theta_2 = 360;
     int theta_1_sign = 1;
-    int theta_2_sign = 1;
-    //test.rotate_rect(theta_1);
+    int theta_2_sign = -1;
+    //test.rotate_rect(15);
     float move_speed = 10;
-    //test2.rotate_rect(theta_2);
+    //test2.rotate_rect(135);
 
     struct move {
         bool left;
@@ -98,22 +98,28 @@ int main(){
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);	
        
-            if (input.right && !test.collision_to_right())
+            if (input.right && !test.collision(TO_RIGHT))
             {
                 x += 5;
             } 
-            if (input.left && !test.collision_to_left())
+            if (input.left && !test.collision(TO_LEFT))
             {
                 x -= 5;
             }
-            if (input.up && !test.collision_above()){
+            if (input.up && !test.collision(ABOVE) ){
                 y -= 5;
             } 
-            if (input.down && !test.collision_below())
+            if (input.down && !test.collision(BELOW))
             {
                 y += 5;
             }
+
+            
     
+            std::cout << " right collision: " << test.collision(TO_RIGHT) << std::endl;
+            std::cout << "left collision: " << test.collision(TO_LEFT) << std::endl;
+            std::cout << " up collision: " << test.collision(ABOVE) << std::endl;
+            std::cout << " down collision: " << test.collision(BELOW) << std::endl;
         test.set_position(x,y);
         test.rotate_rect(theta_1);
         test2.rotate_rect(theta_2);
