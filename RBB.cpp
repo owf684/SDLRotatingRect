@@ -30,9 +30,9 @@ int main(){
     float theta_2 = 360;
     int theta_1_sign = 1;
     int theta_2_sign = -1;
-    //test.rotate_rect(15);
+    //test.rotate_rect(180);
     float move_speed = 10;
-    //test2.rotate_rect(135);
+    //test2.rotate_rect(90);
 
     struct move {
         bool left;
@@ -131,9 +131,9 @@ int main(){
         {
             theta_1_sign *= -1;
         }
-        if (test2.Rect2DIntersect(test)) {
+        /*if (test2.Rect2DIntersect(test)) {
             theta_2_sign *= -1;
-        }
+        }*/
 
         theta_1 += 1*theta_1_sign;
 
